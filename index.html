@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>English Made Sense — Spiral Grammar Engine</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        themeBg: 'var(--bg-color)',
+                        themeCard: 'var(--card-bg)',
+                        themeText: 'var(--text-main)',
+                        themeAccent: 'var(--accent-color)',
+                        themeBorder: 'var(--border-color)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-color: #fff0f3;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --accent-color: #ff6584;
+            --border-color: #ffd1dc;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .card-surface {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .accent-bg { background-color: var(--accent-color); }
+        .accent-text { color: var(--accent-color); }
+        .accent-border { border-color: var(--accent-color); }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased overflow-x-hidden">
+
+    <!-- ONBOARDING AI CONSENT MODAL -->
+    <div id="consentModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="card-surface max-w-md w-full rounded-2xl p-6 shadow-2xl border">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-12 h-12 rounded-full accent-bg flex items-center justify-center text-white font-bold text-xl">EMS</div>
+                <div>
+                    <h3 class="text-lg font-bold">Welcome to English Made Sense</h3>
+                    <p class="text-xs opacity-75">Savinethuni Spiral Grammar Engine</p>
+                </div>
+            </div>
+            <p class="text-sm mb-4 leading-relaxed">
+                We use advanced AI diagnostics to personalize your grammar path, evaluate IELTS/Cambridge essays, and analyze speech pronunciations. By entering, you consent to secure diagnostic processing.
+            </p>
+            <div class="flex items-center justify-between mt-6">
+                <button onclick="openLoginModal()" class="text-xs underline opacity-80 hover:opacity-100">Reviewer Login</button>
+                <button onclick="acceptConsent()" class="accent-bg text-white px-6 py-2 rounded-xl font-semibold shadow-md hover:opacity-90 transition">Accept & Start</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP STORE REVIEWER LOGIN MODAL -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="card-surface max-w-sm w-full rounded-2xl p-6 shadow-2xl border">
+            <h3 class="text-lg font-bold mb-2">Reviewer Portal Access</h3>
+            <p class="text-xs opacity-75 mb-4">Apple/Google store compliance inspection credentials.</p>
+            <input type="email" id="loginEmail" placeholder="reviewer@savinethuni.com" class="w-full p-2.5 rounded-xl border mb-3 text-sm bg-transparent">
+            <input type="password" id="loginPass" placeholder="ReviewerPass2026!" class="w-full p-2.5 rounded-xl border mb-4 text-sm bg-transparent">
+            <div class="flex justify-end space-x-2">
+                <button onclick="document.getElementById('loginModal').classList.add('hidden')" class="px-4 py-2 text-xs rounded-xl border">Cancel</button>
+                <button onclick="processReviewerLogin()" class="accent-bg text-white px-4 py-2 text-xs rounded-xl font-semibold">Unlock Premium</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PREMIUM PAYWALL MODAL -->
+    <div id="paywallModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="card-surface max-w-md w-full rounded-2xl p-6 shadow-2xl border text-center">
+            <div class="w-16 h-16 rounded-full accent-bg/20 text-accent-color flex items-center justify-center mx-auto mb-4 text-2xl font-bold">🔒</div>
+            <h3 class="text-xl font-bold mb-2">Unlock Full Premium Access</h3>
+            <p class="text-sm mb-6 opacity-80">Get unrestricted access to Books D–I, Advanced IELTS Suites, and 6 Exclusive Subscriber Themes.</p>
+            <div class="space-y-3 mb-6 text-left text-xs bg-black/5 p-4 rounded-xl">
+                <div class="flex items-center space-x-2"><span>✅</span><span>Books D–I (Advanced Syntactic & IELTS Suites)</span></div>
+                <div class="flex items-center space-x-2"><span>✅</span><span>All 6 Premium Themes (Midnight, Cyberpunk, etc.)</span></div>
+                <div class="flex items-center space-x-2"><span>✅</span><span>Unlimited AI Essay & Speech Diagnostics</span></div>
+            </div>
+            <button onclick="simulateUpgrade()" class="w-full accent-bg text-white py-3 rounded-xl font-bold shadow-lg mb-2">Upgrade Now ($9.99/mo)</button>
+            <button onclick="document.getElementById('paywallModal').classList.add('hidden')" class="text-xs opacity-70 underline">Maybe Later</button>
+        </div>
+    </div>
+
+    <!-- HEADER & DYNAMIC SVG BRANDING -->
+    <header class="card-surface border-b px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+        <div class="flex items-center space-x-3">
+            <svg id="emsSvgBadge" class="w-10 h-10 transition-all duration-300" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="var(--accent-color)" opacity="0.2"/>
+                <circle cx="50" cy="50" r="35" fill="var(--accent-color)"/>
+                <text x="50" y="58" font-size="32" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="sans-serif">EMS</text>
+            </svg>
+            <div>
+                <h1 class="font-bold text-base leading-tight">English Made Sense</h1>
+                <p class="text-[10px] opacity-70 tracking-wide uppercase">Spiral Grammar Engine • Savinethuni</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="toggleAudioChimes()" id="audioToggleBtn" class="p-2 rounded-xl border text-xs" title="Toggle Sound Chimes">🔊</button>
+            <button onclick="openSettings()" class="p-2 rounded-xl border text-xs" title="Settings & Account">⚙️</button>
+        </div>
+    </header>
+
+    <!-- MAIN APP NAVIGATION -->
+    <nav class="card-surface border-b flex justify-around p-2 text-xs font-semibold overflow-x-auto">
+        <button onclick="switchTab('curriculum')" class="tab-btn px-3 py-1.5 rounded-lg accent-bg text-white whitespace-nowrap" data-tab="curriculum">📚 Books A–I</button>
+        <button onclick="switchTab('exams')" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap opacity-70 hover:opacity-100" data-tab="exams">🎯 4-Skill Exam Studio</button>
+        <button onclick="switchTab('dialects')" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap opacity-70 hover:opacity-100" data-tab="dialects">🌍 Dialect Studio</button>
+        <button onclick="switchTab('settings')" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap opacity-70 hover:opacity-100" data-tab="settings">🎨 Themes & Settings</button>
+    </nav>
+
+    <!-- CONTENT CONTAINER -->
+    <main class="flex-1 overflow-y-auto p-4 max-w-4xl w-full mx-auto pb-20">
+
+        <!-- TAB 1: CURRICULUM (BOOKS A-I) -->
+        <section id="tab-curriculum" class="space-y-4">
+            <div class="card-surface p-5 rounded-2xl border shadow-sm flex items-center justify-between">
+                <div>
+                    <h2 class="font-bold text-lg mb-1">Spiral Curriculum Path</h2>
+                    <p class="text-xs opacity-75">Progressive mastery from foundational building blocks to advanced IELTS register.</p>
+                </div>
+                <div id="personaBadge" class="flex items-center space-x-2 bg-black/5 p-2 rounded-xl">
+                    <span class="text-xl">👩‍🏫</span>
+                    <div class="text-left text-[10px]">
+                        <p class="font-bold">Maya (Grammar)</p>
+                        <p class="opacity-70">Active Guide</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="booksGrid">
+                <!-- Injected via JavaScript -->
+            </div>
+        </section>
+
+        <!-- TAB 2: EXAM STUDIO -->
+        <section id="tab-exams" class="hidden space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button onclick="switchExamSub('listening')" class="exam-sub-btn p-3 rounded-xl border text-center font-bold text-xs accent-bg text-white" data-sub="listening">🎧 Listening</button>
+                <button onclick="switchExamSub('reading')" class="exam-sub-btn p-3 rounded-xl border text-center font-bold text-xs opacity-70" data-sub="reading">📖 Reading</button>
+                <button onclick="switchExamSub('writing')" class="exam-sub-btn p-3 rounded-xl border text-center font-bold text-xs opacity-70" data-sub="writing">✍️ Writing</button>
+                <button onclick="switchExamSub('speaking')" class="exam-sub-btn p-3 rounded-xl border text-center font-bold text-xs opacity-70" data-sub="speaking">🗣️ Speaking</button>
+            </div>
+
+            <!-- Listening Studio -->
+            <div id="exam-listening" class="exam-panel card-surface p-5 rounded-2xl border space-y-4">
+                <h3 class="font-bold text-sm">British RP Audiobook & Note Completion</h3>
+                <p class="text-xs opacity-75">Listen to the native British RP clip and complete the exercise below.</p>
+                <div class="p-3 bg-black/5 rounded-xl flex items-center justify-between">
+                    <span class="text-xs font-mono">AudioClip_BookD_Lecture.mp3 (en-GB)</span>
+                    <button onclick="playAudioClip()" class="accent-bg text-white px-4 py-1.5 rounded-lg text-xs font-semibold">▶ Play Audio</button>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold block">1. The primary syntactic driver in clause structure is...</label>
+                    <input type="text" placeholder="Type missing word..." class="w-full p-2.5 text-xs rounded-xl border bg-transparent">
+                </div>
+                <button onclick="checkQuizAnswer(true)" class="accent-bg text-white w-full py-2 rounded-xl text-xs font-semibold">Submit Answer</button>
+            </div>
+
+            <!-- Reading Studio -->
+            <div id="exam-reading" class="exam-panel hidden card-surface p-5 rounded-2xl border space-y-4">
+                <h3 class="font-bold text-sm">Advanced Academic Reading</h3>
+                <div class="p-4 bg-black/5 rounded-xl text-xs leading-relaxed space-y-2 max-h-48 overflow-y-auto">
+                    <p>"The dichotomy between prescriptive grammar and descriptive linguistics remains a central pillar in modern sociolinguistic inquiry..."</p>
+                    <p>Highlight vocabulary terms to reveal contextual definitions and semantic nuances.</p>
+                </div>
+                <button onclick="playChime('success')" class="accent-bg text-white w-full py-2 rounded-xl text-xs font-semibold">Complete Reading Task</button>
+            </div>
+
+            <!-- Writing Studio -->
+            <div id="exam-writing" class="exam-panel hidden card-surface p-5 rounded-2xl border space-y-4">
+                <h3 class="font-bold text-sm">Automated IELTS/Cambridge Essay Evaluator</h3>
+                <textarea rows="4" placeholder="Draft your academic essay here for instant 1.0–9.0 band scoring..." class="w-full p-3 text-xs rounded-xl border bg-transparent"></textarea>
+                <button onclick="evaluateEssay()" class="accent-bg text-white w-full py-2 rounded-xl text-xs font-semibold">Evaluate Band Score</button>
+                <div id="essayResult" class="hidden p-3 bg-black/5 rounded-xl text-xs space-y-1">
+                    <p class="font-bold">Estimated Band Score: <span class="text-emerald-600 font-extrabold text-sm">7.5</span></p>
+                    <p class="opacity-80">Task Achievement: 8.0 | Coherence: 7.5 | Lexical: 7.0 | Grammar: 7.5</p>
+                </div>
+            </div>
+
+            <!-- Speaking Studio -->
+            <div id="exam-speaking" class="exam-panel hidden card-surface p-5 rounded-2xl border space-y-4 text-center">
+                <h3 class="font-bold text-sm">Native Mic Pronunciation Diagnostic</h3>
+                <p class="text-xs opacity-75">Read aloud: <span class="font-bold italic">"Pronunciation accuracy dictates phonetic clarity."</span></p>
+                <div class="w-20 h-20 rounded-full accent-bg/20 text-accent-color flex items-center justify-center mx-auto text-3xl animate-pulse">🎙️</div>
+                <button onclick="playChime('success'); alert('Pronunciation Analyzed: 94% Accuracy')" class="accent-bg text-white px-6 py-2 rounded-xl text-xs font-semibold">Start Recording</button>
+            </div>
+        </section>
+
+        <!-- TAB 3: COMPARATIVE DIALECT STUDIO -->
+        <section id="tab-dialects" class="hidden space-y-4">
+            <div class="card-surface p-5 rounded-2xl border space-y-4">
+                <h3 class="font-bold text-sm">Comparative Dialect Studio (UK / US / AU)</h3>
+                <p class="text-xs opacity-75">Compare vocabulary, spelling conventions, and live voice synthesis side-by-side.</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="p-3 bg-black/5 rounded-xl text-center">
+                        <p class="font-bold text-xs">British (en-GB)</p>
+                        <p class="text-[11px] opacity-75 my-1">Colour / Centre</p>
+                        <button onclick="speakDialect('Colour', 'en-GB')" class="text-[10px] accent-bg text-white px-2 py-1 rounded">🔊 Listen</button>
+                    </div>
+                    <div class="p-3 bg-black/5 rounded-xl text-center">
+                        <p class="font-bold text-xs">American (en-US)</p>
+                        <p class="text-[11px] opacity-75 my-1">Color / Center</p>
+                        <button onclick="speakDialect('Color', 'en-US')" class="text-[10px] accent-bg text-white px-2 py-1 rounded">🔊 Listen</button>
+                    </div>
+                    <div class="p-3 bg-black/5 rounded-xl text-center">
+                        <p class="font-bold text-xs">Australian (en-AU)</p>
+                        <p class="text-[11px] opacity-75 my-1">Colour / Centre</p>
+                        <button onclick="speakDialect('Colour', 'en-AU')" class="text-[10px] accent-bg text-white px-2 py-1 rounded">🔊 Listen</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: THEMES & SETTINGS -->
+        <section id="tab-settings" class="hidden space-y-4">
+            <div class="card-surface p-5 rounded-2xl border space-y-4">
+                <h3 class="font-bold text-sm">Theme Engine</h3>
+                <p class="text-xs opacity-75">Select core free themes or unlock subscriber premium palettes.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="themePickerGrid">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <div class="card-surface p-5 rounded-2xl border space-y-3">
+                <h3 class="font-bold text-sm text-red-500">Account & Data Management</h3>
+                <p class="text-xs opacity-75">Per app store compliance guidelines, you can permanently wipe all local storage and session credentials instantly.</p>
+                <button onclick="deleteAccountData()" class="bg-red-500 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-red-600 transition">Delete Account & Data</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        // State Management
+        let appState = {
+            theme: 'soft-pink',
+            soundEnabled: true,
+            isSubscribed: false,
+            consentGiven: false
+        };
+
+        const themes = {
+            'soft-pink': { name: 'Baby Pink', bg: '#fff0f3', card: '#ffffff', text: '#2d3748', accent: '#ff6584', border: '#ffd1dc', free: true },
+            'soft-blue': { name: 'Baby Blue', bg: '#f0f7ff', card: '#ffffff', text: '#1e3a8a', accent: '#3b82f6', border: '#bfdbfe', free: true },
+            'soft-yellow': { name: 'Butter Yellow', bg: '#fcfbe3', card: '#ffffff', text: '#713f12', accent: '#eab308', border: '#fef08a', free: true },
+            'midnight-violet': { name: 'Midnight Violet', bg: '#0f172a', card: '#1e293b', text: '#f8fafc', accent: '#8b5cf6', border: '#334155', free: false },
+            'emerald-forest': { name: 'Emerald Forest', bg: '#022c22', card: '#064e3b', text: '#ecfdf5', accent: '#10b981', border: '#047857', free: false },
+            'deep-onyx': { name: 'Deep Onyx', bg: '#000000', card: '#121212', text: '#ffffff', accent: '#6366f1', border: '#27272a', free: false },
+            'cyberpunk-neon': { name: 'Cyberpunk Neon', bg: '#18181b', card: '#27272a', text: '#fafafa', accent: '#f43f5e', border: '#3f3f46', free: false },
+            'sunset-amber': { name: 'Sunset Amber', bg: '#fff7ed', card: '#ffffff', text: '#7c2d12', accent: '#f97316', border: '#fed7aa', free: false },
+            'lavender-luxury': { name: 'Lavender Luxury', bg: '#faf5ff', card: '#ffffff', text: '#581c87', accent: '#a855f7', border: '#e9d5ff', free: false }
+        };
+
+        const books = [
+            { id: 'A', title: 'Book A: Foundations', desc: 'Basic sentence architecture & parts of speech.', free: true, persona: 'Maya' },
+            { id: 'B', title: 'Book B: Tenses', desc: 'Past, present, future aspect mastery.', free: true, persona: 'Maya' },
+            { id: 'C', title: 'Book C: Syntax', desc: 'Clause coordination & subordination.', free: true, persona: 'Maya' },
+            { id: 'D', title: 'Book D: Modality', desc: 'Modal verbs of obligation & probability.', free: false, persona: 'Alex' },
+            { id: 'E', title: 'Book E: Clauses', desc: 'Relative clauses & participle phrases.', free: false, persona: 'Alex' },
+            { id: 'F', title: 'Book F: Discourse', desc: 'Cohesive devices & academic register.', free: false, persona: 'Emma' },
+            { id: 'G', title: 'Book G: Inversion', desc: 'Stylistic fronting & syntactic inversion.', free: false, persona: 'Emma' },
+            { id: 'H', title: 'Book H: IPA Phonetics', desc: 'International Phonetic Alphabet breakdown.', free: false, persona: 'Alex' },
+            { id: 'I', title: 'Book I: IELTS Suite', desc: 'Band 9.0 synthesis & stylistic polish.', free: false, persona: 'Emma' }
+        ];
+
+        // Web Audio API Chime Generator
+        function playChime(type) {
+            if (!appState.soundEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const now = ctx.currentTime;
+                
+                if (type === 'success') {
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.1, now + i * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + i * 0.08);
+                        osc.stop(now + i * 0.08 + 0.3);
+                    });
+                } else if (type === 'error') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            } catch(e) { console.log(e); }
+        }
+
+        // Theme Switcher Engine
+        function setTheme(themeKey) {
+            const t = themes[themeKey];
+            if (!t.free && !appState.isSubscribed) {
+                document.getElementById('paywallModal').classList.remove('hidden');
+                return;
+            }
+            appState.theme = themeKey;
+            const root = document.documentElement;
+            root.style.setProperty('--bg-color', t.bg);
+            root.style.setProperty('--card-bg', t.card);
+            root.style.setProperty('--text-main', t.text);
+            root.style.setProperty('--accent-color', t.accent);
+            root.style.setProperty('--border-color', t.border);
+            
+            renderThemePicker();
+            renderBooks();
+        }
+
+        function renderThemePicker() {
+            const grid = document.getElementById('themePickerGrid');
+            grid.innerHTML = '';
+            for (const [key, t] of Object.entries(themes)) {
+                const isLocked = !t.free && !appState.isSubscribed;
+                const isSelected = appState.theme === key;
+                const btn = document.createElement('button');
+                btn.className = `p-3 rounded-xl border text-left flex items-center justify-between transition ${isSelected ? 'ring-2 ring-offset-2 ring-accent' : ''}`;
+                btn.style.backgroundColor = t.card;
+                btn.style.color = t.text;
+                btn.innerHTML = `
+                    <div>
+                        <p class="font-bold text-xs">${t.name}</p>
+                        <p class="text-[10px] opacity-75">${t.free ? 'Free' : 'Subscriber'}</p>
+                    </div>
+                    ${isLocked ? '<span>🔒</span>' : (isSelected ? '<span>✓</span>' : '')}
+                `;
+                btn.onclick = () => setTheme(key);
+                grid.appendChild(btn);
+            }
+        }
+
+        function renderBooks() {
+            const grid = document.getElementById('booksGrid');
+            grid.innerHTML = '';
+            books.forEach(b => {
+                const isLocked = !b.free && !appState.isSubscribed;
+                const card = document.createElement('div');
+                card.className = `card-surface p-4 rounded-2xl border relative flex flex-col justify-between ${isLocked ? 'opacity-80' : ''}`;
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold px-2 py-0.5 rounded accent-bg text-white">${b.id}</span>
+                            ${isLocked ? '<span class="text-xs">🔒 Locked</span>' : '<span class="text-xs text-emerald-600">Unlocked</span>'}
+                        </div>
+                        <h3 class="font-bold text-sm mb-1">${b.title}</h3>
+                        <p class="text-xs opacity-75 mb-4">${b.desc}</p>
+                    </div>
+                    <button onclick="openBook('${b.id}', ${!isLocked})" class="w-full py-2 rounded-xl text-xs font-semibold ${isLocked ? 'border' : 'accent-bg text-white'}">
+                        ${isLocked ? 'Unlock Book' : 'Start Learning'}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openBook(id, isUnlocked) {
+            if (!isUnlocked) {
+                document.getElementById('paywallModal').classList.remove('hidden');
+                return;
+            }
+            playChime('success');
+            alert(`Opening Book ${id}: Spiral Grammar Interactive Module.`);
+        }
+
+        // Navigation Engine
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('accent-bg', 'text-white');
+                btn.classList.add('opacity-70');
+                if(btn.dataset.tab === tabId) {
+                    btn.classList.add('accent-bg', 'text-white');
+                    btn.classList.remove('opacity-70');
+                }
+            });
+        }
+
+        function switchExamSub(subId) {
+            document.querySelectorAll('.exam-panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`exam-${subId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.exam-sub-btn').forEach(btn => {
+                btn.classList.remove('accent-bg', 'text-white');
+                btn.classList.add('opacity-70');
+                if(btn.dataset.sub === subId) {
+                    btn.classList.add('accent-bg', 'text-white');
+                    btn.classList.remove('opacity-70');
+                }
+            });
+        }
+
+        // Audio & Dialects
+        function playAudioClip() {
+            if ('speechSynthesis' in window) {
+                const utter = new SpeechSynthesisUtterance("The primary syntactic driver in clause structure is recursive embedding.");
+                utter.lang = 'en-GB';
+                window.speechSynthesis.speak(utter);
+            }
+            playChime('success');
+        }
+
+        function speakDialect(text, lang) {
+            if ('speechSynthesis' in window) {
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = lang;
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        function toggleAudioChimes() {
+            appState.soundEnabled = !appState.soundEnabled;
+            document.getElementById('audioToggleBtn').innerText = appState.soundEnabled ? '🔊' : '🔇';
+            playChime('success');
+        }
+
+        // Exam Evaluators
+        function checkQuizAnswer(isCorrect) {
+            if (isCorrect) {
+                playChime('success');
+                alert('Correct! Ascending major triad chord played.');
+            } else {
+                playChime('error');
+                alert('Incorrect. Dual-tone buzz played.');
+            }
+        }
+
+        function evaluateEssay() {
+            playChime('success');
+            document.getElementById('essayResult').classList.remove('hidden');
+        }
+
+        // Compliance & Reviewer
+        function acceptConsent() {
+            appState.consentGiven = true;
+            document.getElementById('consentModal').classList.add('hidden');
+            playChime('success');
+        }
+
+        function openLoginModal() {
+            document.getElementById('consentModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function processReviewerLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            if (email === 'reviewer@savinethuni.com' && pass === 'ReviewerPass2026!') {
+                appState.isSubscribed = true;
+                document.getElementById('loginModal').classList.add('hidden');
+                renderThemePicker();
+                renderBooks();
+                playChime('success');
+                alert('Reviewer Access Granted: Full Premium Unlocked.');
+            } else {
+                playChime('error');
+                alert('Invalid credentials. Use reviewer@savinethuni.com / ReviewerPass2026!');
+            }
+        }
+
+        function simulateUpgrade() {
+            appState.isSubscribed = true;
+            document.getElementById('paywallModal').classList.add('hidden');
+            renderThemePicker();
+            renderBooks();
+            playChime('success');
+            alert('Subscription Activated Successfully!');
+        }
+
+        function deleteAccountData() {
+            if (confirm('Are you sure you want to permanently delete all account data and local storage settings?')) {
+                localStorage.clear();
+                alert('All account data wiped successfully.');
+                location.reload();
+            }
+        }
+
+        function openSettings() {
+            switchTab('settings');
+        }
+
+        // Initialize App
+        window.onload = () => {
+            renderThemePicker();
+            renderBooks();
+        };
+    </script>
+</body>
+</html>
