@@ -1,517 +1,950 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>English Made Sense — Spiral Grammar Engine</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        themeBg: 'var(--bg-color)',
-                        themeCard: 'var(--card-bg)',
-                        themeText: 'var(--text-main)',
-                        themeAccent: 'var(--accent-color)',
-                        themeBorder: 'var(--border-color)'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        :root {
-            --bg-color: #fff0f3;
-            --card-bg: #ffffff;
-            --text-main: #2d3748;
-            --accent-color: #ff6584;
-            --border-color: #ffd1dc;
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .card-surface {
-            background-color: var(--card-bg);
-            border-color: var(--border-color);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-        .accent-bg { background-color: var(--accent-color); }
-        .accent-text { color: var(--accent-color); }
-        .accent-border { border-color: var(--accent-color); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Made Sense — Spiral Grammar Engine by Savinethuni</title>
+
+<!-- React & ReactDOM CDN -->
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+<!-- Babel Standalone for JSX transformation -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Lucide Icons CDN -->
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="h-full flex flex-col font-sans antialiased overflow-x-hidden">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+<div id="root"></div>
 
-    <!-- ONBOARDING AI CONSENT MODAL -->
-    <div id="consentModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="card-surface max-w-md w-full rounded-2xl p-6 shadow-2xl border">
-            <div class="flex items-center space-x-3 mb-4">
-                <div class="w-12 h-12 rounded-full accent-bg flex items-center justify-center text-white font-bold text-xl">EMS</div>
-                <div>
-                    <h3 class="text-lg font-bold">Welcome to English Made Sense</h3>
-                    <p class="text-xs opacity-75">Savinethuni Spiral Grammar Engine</p>
-                </div>
-            </div>
-            <p class="text-sm mb-4 leading-relaxed">
-                We use advanced AI diagnostics to personalize your grammar path, evaluate IELTS/Cambridge essays, and analyze speech pronunciations. By entering, you consent to secure diagnostic processing.
-            </p>
-            <div class="flex items-center justify-between mt-6">
-                <button onclick="openLoginModal()" class="text-xs underline opacity-80 hover:opacity-100">Reviewer Login</button>
-                <button onclick="acceptConsent()" class="accent-bg text-white px-6 py-2 rounded-xl font-semibold shadow-md hover:opacity-90 transition">Accept & Start</button>
-            </div>
-        </div>
-    </div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
 
-    <!-- APP STORE REVIEWER LOGIN MODAL -->
-    <div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="card-surface max-w-sm w-full rounded-2xl p-6 shadow-2xl border">
-            <h3 class="text-lg font-bold mb-2">Reviewer Portal Access</h3>
-            <p class="text-xs opacity-75 mb-4">Apple/Google store compliance inspection credentials.</p>
-            <input type="email" id="loginEmail" placeholder="reviewer@savinethuni.com" class="w-full p-2.5 rounded-xl border mb-3 text-sm bg-transparent">
-            <input type="password" id="loginPass" placeholder="ReviewerPass2026!" class="w-full p-2.5 rounded-xl border mb-4 text-sm bg-transparent">
-            <div class="flex justify-end space-x-2">
-                <button onclick="document.getElementById('loginModal').classList.add('hidden')" class="px-4 py-2 text-xs rounded-xl border">Cancel</button>
-                <button onclick="processReviewerLogin()" class="accent-bg text-white px-4 py-2 text-xs rounded-xl font-semibold">Unlock Premium</button>
-            </div>
-        </div>
-    </div>
+// --- CURRICULUM DATA ---
+const CURRICULUM = {
+'Book A': {
+level: 'Beginner',
+title: 'English Foundations',
+goal: 'I understand how basic English sentences are built.',
+concepts: [
+{ id: 'c_a1', name: 'Nouns & Pronouns', topic: 'Words', desc: 'Identify people, places, things, and words that replace them.' },
+{ id: 'c_a2', name: 'Basic Subject-Verb-Object', topic: 'Building Sentences', desc: 'Construct basic statements in standard word order.' },
+{ id: 'c_a3', name: 'Articles: A, An, The', topic: 'Basic Noun Grammar', desc: 'Use basic definite and indefinite articles.' },
+{ id: 'c_a4', name: 'Present Simple (Be & Do)', topic: 'Basic Verbs', desc: 'Express facts and daily states.' }
+]
+},
+'Book B': {
+level: 'Elementary',
+title: 'Core English Grammar',
+goal: 'Reliable core grammar in everyday scenarios.',
+concepts: [
+{ id: 'c_b1', name: 'Countability & Articles', topic: 'Articles & Nouns', desc: 'Spiral Article depth: Countable vs Uncountable usage.' },
+{ id: 'c_b2', name: 'Past Simple & Past Continuous', topic: 'Time & Tense', desc: 'Describe completed past actions and interrupted events.' },
+{ id: 'c_b3', name: 'Basic Modals (Can, Must, Should)', topic: 'Modality', desc: 'Express ability, obligation, and advice.' }
+]
+},
+'Book C': {
+level: 'Pre-Intermediate',
+title: 'Developing Grammar',
+goal: 'Understand not only WHAT form to use, but WHY.',
+concepts: [
+{ id: 'c_c1', name: 'Zero Article & Generalizations', topic: 'Articles Depth', desc: 'Spiral Article depth: Omission of articles in general statements.' },
+{ id: 'c_c2', name: 'Present Perfect vs Past Simple', topic: 'Aspect & Time', desc: 'Connect past actions to present consequences.' },
+{ id: 'c_c3', name: 'First & Second Conditionals', topic: 'Conditionals', desc: 'Hypothesize about real and imaginary situations.' }
+]
+},
+'Book D': {
+level: 'Intermediate',
+title: 'Intermediate English Grammar',
+goal: 'Explore rules deeply and refine expressiveness.',
+concepts: [
+{ id: 'c_d1', name: 'Nuanced Article Choices', topic: 'Articles Depth', desc: 'Spiral Article depth: Contextual, cultural, and specific nuances.' },
+{ id: 'c_d2', name: 'Passive Voice & Causatives', topic: 'Sentence Architecture', desc: 'Shift focus from agent to action or receiver.' }
+]
+},
+'Book E': {
+level: 'Upper-Intermediate',
+title: 'Upper-Intermediate Grammar',
+goal: 'Master complex syntax, emphasis, and natural flow.',
+concepts: [
+{ id: 'c_e1', name: 'Complex Noun Phrases & Articles', topic: 'Articles Depth', desc: 'Spiral Article depth: Multi-layered pre/post-modified phrases.' },
+{ id: 'c_e2', name: 'Inversion & Cleft Sentences', topic: 'Emphasis', desc: 'Rearrange sentence constituents for dramatic focus.' }
+]
+},
+'Book F': {
+level: 'Advanced',
+title: 'Advanced English Grammar',
+goal: 'Your system: Precise control over nuance and register.',
+concepts: [
+{ id: 'c_f1', name: 'Information Structure & Focus', topic: 'Discourse', desc: 'Spiral Article depth: Given vs new information packaging.' }
+]
+},
+'Book G': {
+level: 'Mastery',
+title: 'Mastering English Grammar',
+goal: 'Analyze English critically as a flexible dynamic system.',
+concepts: [
+{ id: 'c_g1', name: 'Discourse Markers & Stance', topic: 'Deep Syntax', desc: 'Spiral Article depth: Evaluative framing and rhetoric.' }
+]
+}
+};
 
-    <!-- PREMIUM PAYWALL MODAL -->
-    <div id="paywallModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="card-surface max-w-md w-full rounded-2xl p-6 shadow-2xl border text-center">
-            <div class="w-16 h-16 rounded-full accent-bg/20 text-accent-color flex items-center justify-center mx-auto mb-4 text-2xl font-bold">🔒</div>
-            <h3 class="text-xl font-bold mb-2">Unlock Full Premium Access</h3>
-            <p class="text-sm mb-6 opacity-80">Get unrestricted access to Books D–I, Advanced IELTS Suites, and 6 Exclusive Subscriber Themes.</p>
-            <div class="space-y-3 mb-6 text-left text-xs bg-black/5 p-4 rounded-xl">
-                <div class="flex items-center space-x-2"><span>✅</span><span>Books D–I (Advanced Syntactic & IELTS Suites)</span></div>
-                <div class="flex items-center space-x-2"><span>✅</span><span>All 6 Premium Themes (Midnight, Cyberpunk, etc.)</span></div>
-                <div class="flex items-center space-x-2"><span>✅</span><span>Unlimited AI Essay & Speech Diagnostics</span></div>
-            </div>
-            <button onclick="simulateUpgrade()" class="w-full accent-bg text-white py-3 rounded-xl font-bold shadow-lg mb-2">Upgrade Now ($9.99/mo)</button>
-            <button onclick="document.getElementById('paywallModal').classList.add('hidden')" class="text-xs opacity-70 underline">Maybe Later</button>
-        </div>
-    </div>
+const DIAGNOSTIC_QUESTIONS = [
+{ id: 1, skill: 'Reading', text: 'Read: "She plays piano every evening." What does this tell us?', options: ['She is playing right now', 'It is a regular habit', 'She will play tomorrow', 'She played once'], correct: 1 },
+{ id: 2, skill: 'Reading', text: 'Which sentence implies an unfinished timeframe?', options: ['I lived in Rome for 3 years.', 'I have lived in Rome for 3 years.', 'I spent 3 years in Rome.', 'I was living in Rome.'], correct: 1 },
+{ id: 3, skill: 'Use of English', text: 'Choose the correct option: "I need to buy ___ apple and ___ bread."', options: ['a, a', 'an, some', 'the, a', 'an, a'], correct: 1 },
+{ id: 4, skill: 'Use of English', text: 'Identify the sentence with correct word order:', options: ['Quickly ran the boy to school.', 'The boy ran quickly to school.', 'To school quickly the boy ran.', 'Ran the boy to school quickly.'], correct: 1 },
+{ id: 5, skill: 'Listening', text: 'Audio Prompt: [Pronunciation Check - Schwa sound]. Which word contains a schwa /ə/?', options: ['Cat', 'Banana', 'Bed', 'Sing'], correct: 1 },
+{ id: 6, skill: 'Listening', text: 'Audio Prompt: Which sentence uses weak form of "to"?', options: ['I want to go.', 'To be or not to be.', 'Who did you give it to?', 'To!'], correct: 0 },
+{ id: 7, skill: 'Writing', type: 'text', text: 'Write a full sentence explaining what you like to do on weekends:' },
+{ id: 8, skill: 'Writing', type: 'text', text: 'Correct this sentence: "He dont like apples nor he cant eat them."' },
+{ id: 9, skill: 'Speaking', type: 'speech', text: 'Read aloud into mic: "The weather is unexpectedly pleasant today."' },
+{ id: 10, skill: 'Speaking', type: 'speech', text: 'Describe your favorite animal in 2 sentences.' }
+];
 
-    <!-- HEADER & DYNAMIC SVG BRANDING -->
-    <header class="card-surface border-b px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-        <div class="flex items-center space-x-3">
-            <svg id="emsSvgBadge" class="w-10 h-10 transition-all duration-300" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="45" fill="var(--accent-color)" opacity="0.2"/>
-                <circle cx="50" cy="50" r="35" fill="var(--accent-color)"/>
-                <text x="50" y="58" font-size="32" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="sans-serif">EMS</text>
-            </svg>
-            <div>
-                <h1 class="font-bold text-base leading-tight">English Made Sense</h1>
-                <p class="text-[10px] opacity-70 tracking-wide uppercase">Spiral Grammar Engine • Savinethuni</p>
-            </div>
-        </div>
-        <div class="flex items-center space-x-2">
-            <button onclick="toggleAudioChimes()" id="audioToggleBtn" class="p-2 rounded-xl border text-xs" title="Toggle Sound Chimes">🔊</button>
-            <button onclick="openSettings()" class="p-2 rounded-xl border text-xs" title="Settings & Account">⚙️</button>
-        </div>
-    </header>
+const PERSONAS = [
+{ id: 'pippa', name: 'Pippa 🐷', style: 'Playful, warm, encouraging', ageTarget: '4-7 Early Learners', description: 'Uses simple words, friendly praise, and fun analogies.' },
+{ id: 'garbo', name: 'Garbo 🐱', style: 'Funny, relaxed, conversational', ageTarget: '8-12 Young Learners', description: 'Keeps conversations humorous, practical, and casual.' },
+{ id: 'elsie', name: 'Elsie ❄️', style: 'Calm, confident, thoughtful', ageTarget: '13-17 Teens', description: 'Focuses on structural clarity, elegance, and deeper logic.' },
+{ id: 'sofie', name: 'Sofie 🌸', style: 'Friendly, curious, expressive', ageTarget: '18-20 Young Adults', description: 'Engages in rich discussions, register, and living English nuances.' }
+];
 
-    <!-- MAIN APP NAVIGATION -->
-    <nav class="card-surface border-b flex justify-around p-2 text-xs font-semibold overflow-x-auto">
-        <button onclick="switchTab('curriculum')" class="tab-btn px-3 py-1.5 rounded-lg accent-bg text-white whitespace-nowrap" data-tab="curriculum">📚 Books A–I</button>
-        <button onclick="switchTab('exams')" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap opacity-70 hover:opacity-100" data-tab="exams">🎯 4-Skill Exam Studio</button>
-        <button onclick="switchTab('dialects')" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap opacity-70 hover:opacity-100" data-tab="dialects">🌍 Dialect Studio</button>
-        <button onclick="switchTab('settings')" class="tab-btn px-3 py-1.5 rounded-lg whitespace-nowrap opacity-70 hover:opacity-100" data-tab="settings">🎨 Themes & Settings</button>
-    </nav>
+const LIVING_ENGLISH_DATA = {
+'British': { tag: 'UK', spelling: 'Colour / Realise', terms: 'Lorry, Flat, Lift, Rubber', accent: 'RP / Non-rhotic', sample: 'I’ve got to pop to the chemist for some plasters.' },
+'American': { tag: 'US', spelling: 'Color / Realize', terms: 'Truck, Apartment, Elevator, Eraser', accent: 'General American / Rhotic', sample: 'I need to go to the drugstore for some band-aids.' },
+'Australian': { tag: 'AU', spelling: 'Colour / Realise', terms: 'Ute, Unit, Lift, Rubber, Arvo', accent: 'General Australian', sample: 'I’m headin’ to the chemist this arvo for some band-aids.' }
+};
 
-    <!-- CONTENT CONTAINER -->
-    <main class="flex-1 overflow-y-auto p-4 max-w-4xl w-full mx-auto pb-20">
+function App() {
+// App State
+const [theme, setTheme] = useState('pink');
+const [step, setStep] = useState('auth');
 
-        <!-- TAB 1: CURRICULUM (BOOKS A-I) -->
-        <section id="tab-curriculum" class="space-y-4">
-            <div class="card-surface p-5 rounded-2xl border shadow-sm flex items-center justify-between">
-                <div>
-                    <h2 class="font-bold text-lg mb-1">Spiral Curriculum Path</h2>
-                    <p class="text-xs opacity-75">Progressive mastery from foundational building blocks to advanced IELTS register.</p>
-                </div>
-                <div id="personaBadge" class="flex items-center space-x-2 bg-black/5 p-2 rounded-xl">
-                    <span class="text-xl">👩‍🏫</span>
-                    <div class="text-left text-[10px]">
-                        <p class="font-bold">Maya (Grammar)</p>
-                        <p class="opacity-70">Active Guide</p>
-                    </div>
-                </div>
-            </div>
+// Auth State
+const [user, setUser] = useState({ username: '', email: '', password: '', verified: false, age: 10 });
+const [devAuthMode, setDevAuthMode] = useState(true);
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="booksGrid">
-                <!-- Injected via JavaScript -->
-            </div>
-        </section>
+// Diagnostic Engine State
+const [questionCountSetting, setQuestionCountSetting] = useState(5);
+const [diagIndex, setDiagIndex] = useState(0);
+const [diagAnswers, setDiagAnswers] = useState({});
+const [diagScores, setDiagScores] = useState(null);
 
-        <!-- TAB 2: EXAM STUDIO -->
-        <section id="tab-exams" class="hidden space-y-4">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <button onclick="switchExamSub('listening')" class="exam-sub-btn p-3 rounded-xl border text-center font-bold text-xs accent-bg text-white" data-sub="listening">🎧 Listening</button>
-                <button onclick="switchExamSub('reading')" class="exam-sub-btn p-3 rounded-xl border text-center font-bold text-xs opacity-70" data-sub="reading">📖 Reading</button>
-                <button onclick="switchExamSub('writing')" class="exam-sub-btn p-3 rounded-xl border text-center font-bold text-xs opacity-70" data-sub="writing">✍️ Writing</button>
-                <button onclick="switchExamSub('speaking')" class="exam-sub-btn p-3 rounded-xl border text-center font-bold text-xs opacity-70" data-sub="speaking">🗣️ Speaking</button>
-            </div>
+// Learning & Progression State
+const [currentLevel, setCurrentLevel] = useState('Beginner');
+const [activeBook, setActiveBook] = useState('Book A');
+const [streak, setStreak] = useState(3);
+const [achievements, setAchievements] = useState(['First Step', 'Grammar Explorer']);
 
-            <!-- Listening Studio -->
-            <div id="exam-listening" class="exam-panel card-surface p-5 rounded-2xl border space-y-4">
-                <h3 class="font-bold text-sm">British RP Audiobook & Note Completion</h3>
-                <p class="text-xs opacity-75">Listen to the native British RP clip and complete the exercise below.</p>
-                <div class="p-3 bg-black/5 rounded-xl flex items-center justify-between">
-                    <span class="text-xs font-mono">AudioClip_BookD_Lecture.mp3 (en-GB)</span>
-                    <button onclick="playAudioClip()" class="accent-bg text-white px-4 py-1.5 rounded-lg text-xs font-semibold">▶ Play Audio</button>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold block">1. The primary syntactic driver in clause structure is...</label>
-                    <input type="text" placeholder="Type missing word..." class="w-full p-2.5 text-xs rounded-xl border bg-transparent">
-                </div>
-                <button onclick="checkQuizAnswer(true)" class="accent-bg text-white w-full py-2 rounded-xl text-xs font-semibold">Submit Answer</button>
-            </div>
+// Lesson & Practice State
+const [activeConcept, setActiveConcept] = useState(CURRICULUM['Book A'].concepts[0]);
+const [practiceAnswer, setPracticeAnswer] = useState('');
+const [practiceFeedback, setPracticeFeedback] = useState(null);
 
-            <!-- Reading Studio -->
-            <div id="exam-reading" class="exam-panel hidden card-surface p-5 rounded-2xl border space-y-4">
-                <h3 class="font-bold text-sm">Advanced Academic Reading</h3>
-                <div class="p-4 bg-black/5 rounded-xl text-xs leading-relaxed space-y-2 max-h-48 overflow-y-auto">
-                    <p>"The dichotomy between prescriptive grammar and descriptive linguistics remains a central pillar in modern sociolinguistic inquiry..."</p>
-                    <p>Highlight vocabulary terms to reveal contextual definitions and semantic nuances.</p>
-                </div>
-                <button onclick="playChime('success')" class="accent-bg text-white w-full py-2 rounded-xl text-xs font-semibold">Complete Reading Task</button>
-            </div>
+// A2I Conversation Engine State
+const [selectedPersona, setSelectedPersona] = useState(PERSONAS[1]);
+const [correctionPref, setCorrectionPref] = useState('important');
+const [memoryEnabled, setMemoryEnabled] = useState(true);
+const [a2iMemory, setA2iMemory] = useState(['Learner likes swimming', 'Target level: Elementary']);
+const [chatMessages, setChatMessages] = useState([
+{ sender: 'a2i', text: "G'day! I'm Garbo 🐱. What did you get up to today?" }
+]);
+const [chatInput, setChatInput] = useState('');
+const [isRecording, setIsRecording] = useState(false);
+const speechRecognitionRef = useRef(null);
 
-            <!-- Writing Studio -->
-            <div id="exam-writing" class="exam-panel hidden card-surface p-5 rounded-2xl border space-y-4">
-                <h3 class="font-bold text-sm">Automated IELTS/Cambridge Essay Evaluator</h3>
-                <textarea rows="4" placeholder="Draft your academic essay here for instant 1.0–9.0 band scoring..." class="w-full p-3 text-xs rounded-xl border bg-transparent"></textarea>
-                <button onclick="evaluateEssay()" class="accent-bg text-white w-full py-2 rounded-xl text-xs font-semibold">Evaluate Band Score</button>
-                <div id="essayResult" class="hidden p-3 bg-black/5 rounded-xl text-xs space-y-1">
-                    <p class="font-bold">Estimated Band Score: <span class="text-emerald-600 font-extrabold text-sm">7.5</span></p>
-                    <p class="opacity-80">Task Achievement: 8.0 | Coherence: 7.5 | Lexical: 7.0 | Grammar: 7.5</p>
-                </div>
-            </div>
+// Re-initialize Lucide icons on update
+useEffect(() => {
+if (window.lucide) {
+window.lucide.createIcons();
+}
+}, [step, theme, chatMessages, diagIndex]);
 
-            <!-- Speaking Studio -->
-            <div id="exam-speaking" class="exam-panel hidden card-surface p-5 rounded-2xl border space-y-4 text-center">
-                <h3 class="font-bold text-sm">Native Mic Pronunciation Diagnostic</h3>
-                <p class="text-xs opacity-75">Read aloud: <span class="font-bold italic">"Pronunciation accuracy dictates phonetic clarity."</span></p>
-                <div class="w-20 h-20 rounded-full accent-bg/20 text-accent-color flex items-center justify-center mx-auto text-3xl animate-pulse">🎙️</div>
-                <button onclick="playChime('success'); alert('Pronunciation Analyzed: 94% Accuracy')" class="accent-bg text-white px-6 py-2 rounded-xl text-xs font-semibold">Start Recording</button>
-            </div>
-        </section>
+const themeStyles = {
+pink: { bg: 'bg-rose-50', primary: 'bg-pink-500 hover:bg-pink-600 text-white', accent: 'bg-pink-100 text-pink-700', border: 'border-pink-200' },
+blue: { bg: 'bg-sky-50', primary: 'bg-sky-500 hover:bg-sky-600 text-white', accent: 'bg-sky-100 text-sky-700', border: 'border-sky-200' },
+yellow: { bg: 'bg-amber-50', primary: 'bg-amber-500 hover:bg-amber-600 text-white', accent: 'bg-amber-100 text-amber-800', border: 'border-amber-200' }
+}[theme];
 
-        <!-- TAB 3: COMPARATIVE DIALECT STUDIO -->
-        <section id="tab-dialects" class="hidden space-y-4">
-            <div class="card-surface p-5 rounded-2xl border space-y-4">
-                <h3 class="font-bold text-sm">Comparative Dialect Studio (UK / US / AU)</h3>
-                <p class="text-xs opacity-75">Compare vocabulary, spelling conventions, and live voice synthesis side-by-side.</p>
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="p-3 bg-black/5 rounded-xl text-center">
-                        <p class="font-bold text-xs">British (en-GB)</p>
-                        <p class="text-[11px] opacity-75 my-1">Colour / Centre</p>
-                        <button onclick="speakDialect('Colour', 'en-GB')" class="text-[10px] accent-bg text-white px-2 py-1 rounded">🔊 Listen</button>
-                    </div>
-                    <div class="p-3 bg-black/5 rounded-xl text-center">
-                        <p class="font-bold text-xs">American (en-US)</p>
-                        <p class="text-[11px] opacity-75 my-1">Color / Center</p>
-                        <button onclick="speakDialect('Color', 'en-US')" class="text-[10px] accent-bg text-white px-2 py-1 rounded">🔊 Listen</button>
-                    </div>
-                    <div class="p-3 bg-black/5 rounded-xl text-center">
-                        <p class="font-bold text-xs">Australian (en-AU)</p>
-                        <p class="text-[11px] opacity-75 my-1">Colour / Centre</p>
-                        <button onclick="speakDialect('Colour', 'en-AU')" class="text-[10px] accent-bg text-white px-2 py-1 rounded">🔊 Listen</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+const speakText = (text) => {
+if ('speechSynthesis' in window) {
+window.speechSynthesis.cancel();
+const utterance = new SpeechSynthesisUtterance(text);
+utterance.rate = 0.95;
+window.speechSynthesis.speak(utterance);
+}
+};
 
-        <!-- TAB 4: THEMES & SETTINGS -->
-        <section id="tab-settings" class="hidden space-y-4">
-            <div class="card-surface p-5 rounded-2xl border space-y-4">
-                <h3 class="font-bold text-sm">Theme Engine</h3>
-                <p class="text-xs opacity-75">Select core free themes or unlock subscriber premium palettes.</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="themePickerGrid">
-                    <!-- Injected via JS -->
-                </div>
-            </div>
+const handleDiagnosticAnswer = (val) => {
+const updated = { ...diagAnswers, [diagIndex]: val };
+setDiagAnswers(updated);
+if (diagIndex + 1 < Math.min(questionCountSetting, DIAGNOSTIC_QUESTIONS.length)) {
+setDiagIndex(diagIndex + 1);
+} else {
+let correctCount = 0;
+let total = Math.min(questionCountSetting, DIAGNOSTIC_QUESTIONS.length);
+for (let i = 0; i < total; i++) {
+const q = DIAGNOSTIC_QUESTIONS[i];
+if (q.correct !== undefined && updated[i] === q.correct) correctCount++;
+else if (updated[i] && String(updated[i]).trim().length > 3) correctCount++;
+}
+const scorePct = Math.round((correctCount / total) * 100);
+let calculatedLevel = 'Beginner';
+let calculatedBook = 'Book A';
+if (scorePct >= 85) { calculatedLevel = 'Intermediate'; calculatedBook = 'Book D'; }
+else if (scorePct >= 60) { calculatedLevel = 'Elementary'; calculatedBook = 'Book B'; }
 
-            <div class="card-surface p-5 rounded-2xl border space-y-3">
-                <h3 class="font-bold text-sm text-red-500">Account & Data Management</h3>
-                <p class="text-xs opacity-75">Per app store compliance guidelines, you can permanently wipe all local storage and session credentials instantly.</p>
-                <button onclick="deleteAccountData()" class="bg-red-500 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-red-600 transition">Delete Account & Data</button>
-            </div>
-        </section>
+const computedScores = {
+reading: Math.min(100, scorePct + 10),
+writing: Math.max(30, scorePct - 5),
+useOfEnglish: scorePct,
+listening: Math.min(100, scorePct + 5),
+speaking: Math.max(20, scorePct - 10),
+overall: scorePct,
+recommendedLevel: calculatedLevel,
+recommendedBook: calculatedBook
+};
 
-    </main>
+setDiagScores(computedScores);
+setCurrentLevel(calculatedLevel);
+setActiveBook(calculatedBook);
+setStep('placement');
+}
+};
 
-    <!-- JAVASCRIPT ENGINE -->
-    <script>
-        // State Management
-        let appState = {
-            theme: 'soft-pink',
-            soundEnabled: true,
-            isSubscribed: false,
-            consentGiven: false
-        };
+const toggleRecording = () => {
+if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+alert("Browser Speech Recognition is not supported in this browser. Please type your answer.");
+return;
+}
+if (isRecording) {
+speechRecognitionRef.current?.stop();
+setIsRecording(false);
+} else {
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+recognition.continuous = false;
+recognition.interimResults = false;
+recognition.lang = 'en-US';
+recognition.onstart = () => setIsRecording(true);
+recognition.onresult = (e) => {
+const transcript = e.results[0][0].transcript;
+setChatInput(transcript);
+setIsRecording(false);
+};
+recognition.onerror = () => setIsRecording(false);
+recognition.onend = () => setIsRecording(false);
+speechRecognitionRef.current = recognition;
+recognition.start();
+}
+};
 
-        const themes = {
-            'soft-pink': { name: 'Baby Pink', bg: '#fff0f3', card: '#ffffff', text: '#2d3748', accent: '#ff6584', border: '#ffd1dc', free: true },
-            'soft-blue': { name: 'Baby Blue', bg: '#f0f7ff', card: '#ffffff', text: '#1e3a8a', accent: '#3b82f6', border: '#bfdbfe', free: true },
-            'soft-yellow': { name: 'Butter Yellow', bg: '#fcfbe3', card: '#ffffff', text: '#713f12', accent: '#eab308', border: '#fef08a', free: true },
-            'midnight-violet': { name: 'Midnight Violet', bg: '#0f172a', card: '#1e293b', text: '#f8fafc', accent: '#8b5cf6', border: '#334155', free: false },
-            'emerald-forest': { name: 'Emerald Forest', bg: '#022c22', card: '#064e3b', text: '#ecfdf5', accent: '#10b981', border: '#047857', free: false },
-            'deep-onyx': { name: 'Deep Onyx', bg: '#000000', card: '#121212', text: '#ffffff', accent: '#6366f1', border: '#27272a', free: false },
-            'cyberpunk-neon': { name: 'Cyberpunk Neon', bg: '#18181b', card: '#27272a', text: '#fafafa', accent: '#f43f5e', border: '#3f3f46', free: false },
-            'sunset-amber': { name: 'Sunset Amber', bg: '#fff7ed', card: '#ffffff', text: '#7c2d12', accent: '#f97316', border: '#fed7aa', free: false },
-            'lavender-luxury': { name: 'Lavender Luxury', bg: '#faf5ff', card: '#ffffff', text: '#581c87', accent: '#a855f7', border: '#e9d5ff', free: false }
-        };
+const handleSendA2i = () => {
+if (!chatInput.trim()) return;
+const userMsg = chatInput;
+setChatMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
+setChatInput('');
 
-        const books = [
-            { id: 'A', title: 'Book A: Foundations', desc: 'Basic sentence architecture & parts of speech.', free: true, persona: 'Maya' },
-            { id: 'B', title: 'Book B: Tenses', desc: 'Past, present, future aspect mastery.', free: true, persona: 'Maya' },
-            { id: 'C', title: 'Book C: Syntax', desc: 'Clause coordination & subordination.', free: true, persona: 'Maya' },
-            { id: 'D', title: 'Book D: Modality', desc: 'Modal verbs of obligation & probability.', free: false, persona: 'Alex' },
-            { id: 'E', title: 'Book E: Clauses', desc: 'Relative clauses & participle phrases.', free: false, persona: 'Alex' },
-            { id: 'F', title: 'Book F: Discourse', desc: 'Cohesive devices & academic register.', free: false, persona: 'Emma' },
-            { id: 'G', title: 'Book G: Inversion', desc: 'Stylistic fronting & syntactic inversion.', free: false, persona: 'Emma' },
-            { id: 'H', title: 'Book H: IPA Phonetics', desc: 'International Phonetic Alphabet breakdown.', free: false, persona: 'Alex' },
-            { id: 'I', title: 'Book I: IELTS Suite', desc: 'Band 9.0 synthesis & stylistic polish.', free: false, persona: 'Emma' }
-        ];
+setTimeout(() => {
+let reply = "";
+let correctionNote = "";
 
-        // Web Audio API Chime Generator
-        function playChime(type) {
-            if (!appState.soundEnabled) return;
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const now = ctx.currentTime;
-                
-                if (type === 'success') {
-                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        osc.frequency.value = freq;
-                        gain.gain.setValueAtTime(0.1, now + i * 0.08);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
-                        osc.connect(gain);
-                        gain.connect(ctx.destination);
-                        osc.start(now + i * 0.08);
-                        osc.stop(now + i * 0.08 + 0.3);
-                    });
-                } else if (type === 'error') {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(150, now);
-                    osc.frequency.linearRampToValueAtTime(100, now + 0.3);
-                    gain.gain.setValueAtTime(0.1, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 0.3);
-                }
-            } catch(e) { console.log(e); }
-        }
+if (correctionPref === 'every' && !userMsg.toLowerCase().includes('the') && userMsg.length > 15) {
+correctionNote = " 💡 *Grammar tip: Check if you need an article ('a', 'an', or 'the') before your nouns!*";
+}
 
-        // Theme Switcher Engine
-        function setTheme(themeKey) {
-            const t = themes[themeKey];
-            if (!t.free && !appState.isSubscribed) {
-                document.getElementById('paywallModal').classList.remove('hidden');
-                return;
-            }
-            appState.theme = themeKey;
-            const root = document.documentElement;
-            root.style.setProperty('--bg-color', t.bg);
-            root.style.setProperty('--card-bg', t.card);
-            root.style.setProperty('--text-main', t.text);
-            root.style.setProperty('--accent-color', t.accent);
-            root.style.setProperty('--border-color', t.border);
-            
-            renderThemePicker();
-            renderBooks();
-        }
+reply = `${selectedPersona.name.split(' ')[0]}: "I hear you! You said '${userMsg}'. Let's keep exploring how we build this idea together!"${correctionNote}`;
 
-        function renderThemePicker() {
-            const grid = document.getElementById('themePickerGrid');
-            grid.innerHTML = '';
-            for (const [key, t] of Object.entries(themes)) {
-                const isLocked = !t.free && !appState.isSubscribed;
-                const isSelected = appState.theme === key;
-                const btn = document.createElement('button');
-                btn.className = `p-3 rounded-xl border text-left flex items-center justify-between transition ${isSelected ? 'ring-2 ring-offset-2 ring-accent' : ''}`;
-                btn.style.backgroundColor = t.card;
-                btn.style.color = t.text;
-                btn.innerHTML = `
-                    <div>
-                        <p class="font-bold text-xs">${t.name}</p>
-                        <p class="text-[10px] opacity-75">${t.free ? 'Free' : 'Subscriber'}</p>
-                    </div>
-                    ${isLocked ? '<span>🔒</span>' : (isSelected ? '<span>✓</span>' : '')}
-                `;
-                btn.onclick = () => setTheme(key);
-                grid.appendChild(btn);
-            }
-        }
+setChatMessages(prev => [...prev, { sender: 'a2i', text: reply }]);
+speakText(reply.replace(/[\*💡]/g, ''));
+}, 800);
+};
 
-        function renderBooks() {
-            const grid = document.getElementById('booksGrid');
-            grid.innerHTML = '';
-            books.forEach(b => {
-                const isLocked = !b.free && !appState.isSubscribed;
-                const card = document.createElement('div');
-                card.className = `card-surface p-4 rounded-2xl border relative flex flex-col justify-between ${isLocked ? 'opacity-80' : ''}`;
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold px-2 py-0.5 rounded accent-bg text-white">${b.id}</span>
-                            ${isLocked ? '<span class="text-xs">🔒 Locked</span>' : '<span class="text-xs text-emerald-600">Unlocked</span>'}
-                        </div>
-                        <h3 class="font-bold text-sm mb-1">${b.title}</h3>
-                        <p class="text-xs opacity-75 mb-4">${b.desc}</p>
-                    </div>
-                    <button onclick="openBook('${b.id}', ${!isLocked})" class="w-full py-2 rounded-xl text-xs font-semibold ${isLocked ? 'border' : 'accent-bg text-white'}">
-                        ${isLocked ? 'Unlock Book' : 'Start Learning'}
-                    </button>
-                `;
-                grid.appendChild(card);
-            });
-        }
+return (
+<div className={`min-h-screen ${themeStyles.bg} text-slate-800 font-sans transition-colors duration-300`}>
+{/* HEADER NAVBAR */}
+<header className="sticky top-0 z-40 backdrop-blur-md bg-white/70 border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+<div className="flex items-center gap-3 cursor-pointer" onClick={() => setStep('dashboard')}>
+<div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-400 to-sky-400 flex items-center justify-center text-white font-bold text-xl shadow-md">
+EMS
+</div>
+<div>
+<h1 className="font-bold text-slate-900 leading-tight text-sm sm:text-base">English Made Sense</h1>
+<p className="text-xs text-slate-500 font-medium">Spiral Grammar Engine <span className="text-pink-600">by Savinethuni</span></p>
+</div>
+</div>
 
-        function openBook(id, isUnlocked) {
-            if (!isUnlocked) {
-                document.getElementById('paywallModal').classList.remove('hidden');
-                return;
-            }
-            playChime('success');
-            alert(`Opening Book ${id}: Spiral Grammar Interactive Module.`);
-        }
+<div className="flex items-center gap-2 sm:gap-4">
+<div className="flex items-center gap-1 bg-slate-100 p-1 rounded-full border border-slate-200">
+<button onClick={() => setTheme('pink')} title="Baby Pink" className={`w-5 h-5 rounded-full bg-pink-300 ${theme === 'pink' ? 'ring-2 ring-pink-500' : ''}`} />
+<button onClick={() => setTheme('blue')} title="Baby Blue" className={`w-5 h-5 rounded-full bg-sky-300 ${theme === 'blue' ? 'ring-2 ring-sky-500' : ''}`} />
+<button onClick={() => setTheme('yellow')} title="Buttery Yellow" className={`w-5 h-5 rounded-full bg-amber-300 ${theme === 'yellow' ? 'ring-2 ring-amber-500' : ''}`} />
+</div>
 
-        // Navigation Engine
-        function switchTab(tabId) {
-            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('accent-bg', 'text-white');
-                btn.classList.add('opacity-70');
-                if(btn.dataset.tab === tabId) {
-                    btn.classList.add('accent-bg', 'text-white');
-                    btn.classList.remove('opacity-70');
-                }
-            });
-        }
+{user.verified && (
+<div className="flex items-center gap-3">
+<span className="hidden md:flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full text-xs border border-amber-200">
+<i data-lucide="flame" className="w-4 h-4 text-amber-500"></i> {streak} Day Streak
+</span>
+<button onClick={() => setStep('parent')} title="Parent / Teacher Portal" className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+<i data-lucide="users" className="w-5 h-5"></i>
+</button>
+<button onClick={() => setStep('auth')} title="Log Out" className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg">
+<i data-lucide="log-out" className="w-5 h-5"></i>
+</button>
+</div>
+)}
+</div>
+</header>
 
-        function switchExamSub(subId) {
-            document.querySelectorAll('.exam-panel').forEach(p => p.classList.add('hidden'));
-            document.getElementById(`exam-${subId}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.exam-sub-btn').forEach(btn => {
-                btn.classList.remove('accent-bg', 'text-white');
-                btn.classList.add('opacity-70');
-                if(btn.dataset.sub === subId) {
-                    btn.classList.add('accent-bg', 'text-white');
-                    btn.classList.remove('opacity-70');
-                }
-            });
-        }
+{/* MAIN CONTENT */}
+<main className="max-w-5xl mx-auto p-4 sm:p-6 pb-24">
 
-        // Audio & Dialects
-        function playAudioClip() {
-            if ('speechSynthesis' in window) {
-                const utter = new SpeechSynthesisUtterance("The primary syntactic driver in clause structure is recursive embedding.");
-                utter.lang = 'en-GB';
-                window.speechSynthesis.speak(utter);
-            }
-            playChime('success');
-        }
+{/* AUTHENTICATION */}
+{step === 'auth' && (
+<div className="max-w-md mx-auto my-8 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+<h2 className="text-2xl font-bold text-slate-900 mb-1">Begin Your Journey</h2>
+<p className="text-sm text-slate-500 mb-6">Create an account to start the Spiral Grammar Engine.</p>
 
-        function speakDialect(text, lang) {
-            if ('speechSynthesis' in window) {
-                const utter = new SpeechSynthesisUtterance(text);
-                utter.lang = lang;
-                window.speechSynthesis.speak(utter);
-            }
-        }
+<form onSubmit={(e) => { e.preventDefault(); setStep('consent'); }} className="space-y-4">
+<div>
+<label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Username</label>
+<input
+required
+type="text"
+value={user.username}
+onChange={e => setUser({...user, username: e.target.value})}
+placeholder="e.g. Alex"
+className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+/>
+</div>
+<div>
+<label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Email Address</label>
+<input
+required
+type="email"
+value={user.email}
+onChange={e => setUser({...user, email: e.target.value})}
+placeholder="alex@example.com"
+className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+/>
+</div>
+<div>
+<label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Age (4 - 20)</label>
+<input
+required
+type="number"
+min="4" max="20"
+value={user.age}
+onChange={e => setUser({...user, age: parseInt(e.target.value) || 10})}
+className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+/>
+</div>
 
-        function toggleAudioChimes() {
-            appState.soundEnabled = !appState.soundEnabled;
-            document.getElementById('audioToggleBtn').innerText = appState.soundEnabled ? '🔊' : '🔇';
-            playChime('success');
-        }
+<div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-800 space-y-2">
+<div className="flex items-center justify-between font-medium">
+<span>Development Verification Mode</span>
+<input
+type="checkbox"
+checked={devAuthMode}
+onChange={e => setDevAuthMode(e.target.checked)}
+className="accent-amber-600"
+/>
+</div>
+<p className="text-amber-700/80 leading-relaxed">
+{devAuthMode ? '⚡ Dev Mode Active: Bypasses live SMTP server. Auto-verifies account locally.' : '🔒 Production Mode: Requires real email SMTP token backend.'}
+</p>
+</div>
 
-        // Exam Evaluators
-        function checkQuizAnswer(isCorrect) {
-            if (isCorrect) {
-                playChime('success');
-                alert('Correct! Ascending major triad chord played.');
-            } else {
-                playChime('error');
-                alert('Incorrect. Dual-tone buzz played.');
-            }
-        }
+<button type="submit" className={`w-full py-3 font-semibold rounded-xl transition-all shadow-md ${themeStyles.primary}`}>
+Create Account & Continue
+</button>
+</form>
+</div>
+)}
 
-        function evaluateEssay() {
-            playChime('success');
-            document.getElementById('essayResult').classList.remove('hidden');
-        }
+{/* CONSENT */}
+{step === 'consent' && (
+<div className="max-w-lg mx-auto my-8 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+<div className="flex items-center gap-3 text-pink-600">
+<i data-lucide="shield" className="w-8 h-8"></i>
+<h2 className="text-xl font-bold text-slate-900">Consent & Safeguards</h2>
+</div>
 
-        // Compliance & Reviewer
-        function acceptConsent() {
-            appState.consentGiven = true;
-            document.getElementById('consentModal').classList.add('hidden');
-            playChime('success');
-        }
+<div className="text-sm text-slate-600 space-y-3 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200 max-h-60 overflow-y-auto">
+<p className="font-semibold text-slate-800">Child-Safe & Privacy First Environment</p>
+<p>• We do NOT display targeted advertisements.</p>
+<p>• Learner conversations with A2I companions are strictly private and not exposed to parent/teacher logs by default.</p>
+<p>• Age-adapted topic filters are enforced for learners aged 4–12.</p>
+<p>• By clicking Agree & Continue, you acknowledge the terms of learning and safety guidelines under Savinethuni engine protocols.</p>
+</div>
 
-        function openLoginModal() {
-            document.getElementById('consentModal').classList.add('hidden');
-            document.getElementById('loginModal').classList.remove('hidden');
-        }
+<button
+onClick={() => { setUser({...user, verified: true}); setStep('diagnostic'); }}
+className={`w-full py-3 font-semibold rounded-xl shadow-md ${themeStyles.primary}`}
+>
+Agree & Continue to Diagnostic
+</button>
+</div>
+)}
 
-        function processReviewerLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPass').value;
-            if (email === 'reviewer@savinethuni.com' && pass === 'ReviewerPass2026!') {
-                appState.isSubscribed = true;
-                document.getElementById('loginModal').classList.add('hidden');
-                renderThemePicker();
-                renderBooks();
-                playChime('success');
-                alert('Reviewer Access Granted: Full Premium Unlocked.');
-            } else {
-                playChime('error');
-                alert('Invalid credentials. Use reviewer@savinethuni.com / ReviewerPass2026!');
-            }
-        }
+{/* DIAGNOSTIC */}
+{step === 'diagnostic' && (
+<div className="max-w-2xl mx-auto space-y-6">
+<div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+<div>
+<span className="text-xs font-semibold text-pink-600 uppercase tracking-wider">Placement Engine</span>
+<h2 className="text-xl font-bold text-slate-900">Diagnostic Test</h2>
+</div>
+<div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-lg border text-xs">
+<span className="text-slate-500 font-medium">Questions:</span>
+{[3, 5, 10].map(cnt => (
+<button
+key={cnt}
+onClick={() => { setQuestionCountSetting(cnt); setDiagIndex(0); }}
+className={`px-2.5 py-1 rounded-md font-semibold transition-all ${questionCountSetting === cnt ? 'bg-white shadow-sm text-pink-600' : 'text-slate-600'}`}
+>
+{cnt}
+</button>
+))}
+</div>
+</div>
 
-        function simulateUpgrade() {
-            appState.isSubscribed = true;
-            document.getElementById('paywallModal').classList.add('hidden');
-            renderThemePicker();
-            renderBooks();
-            playChime('success');
-            alert('Subscription Activated Successfully!');
-        }
+{(() => {
+const currentQ = DIAGNOSTIC_QUESTIONS[diagIndex];
+const totalQ = Math.min(questionCountSetting, DIAGNOSTIC_QUESTIONS.length);
+return (
+<div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+<div className="flex justify-between items-center text-xs font-medium text-slate-400">
+<span>Component: <strong className="text-slate-700">{currentQ.skill}</strong></span>
+<span>Question {diagIndex + 1} of {totalQ}</span>
+</div>
 
-        function deleteAccountData() {
-            if (confirm('Are you sure you want to permanently delete all account data and local storage settings?')) {
-                localStorage.clear();
-                alert('All account data wiped successfully.');
-                location.reload();
-            }
-        }
+<h3 className="text-lg font-semibold text-slate-800 leading-snug">{currentQ.text}</h3>
 
-        function openSettings() {
-            switchTab('settings');
-        }
+{currentQ.options && (
+<div className="space-y-2.5">
+{currentQ.options.map((opt, idx) => (
+<button
+key={idx}
+onClick={() => handleDiagnosticAnswer(idx)}
+className="w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-pink-300 hover:bg-pink-50/50 transition-all text-sm font-medium text-slate-700 flex items-center justify-between group"
+>
+<span>{opt}</span>
+<i data-lucide="chevron-right" className="w-4 h-4 text-slate-300 group-hover:text-pink-500"></i>
+</button>
+))}
+</div>
+)}
 
-        // Initialize App
-        window.onload = () => {
-            renderThemePicker();
-            renderBooks();
-        };
-    </script>
+{currentQ.type === 'text' && (
+<div className="space-y-4">
+<textarea
+rows={3}
+placeholder="Type your response here..."
+value={diagAnswers[diagIndex] || ''}
+onChange={(e) => setDiagAnswers({...diagAnswers, [diagIndex]: e.target.value})}
+className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none text-sm"
+/>
+<button
+onClick={() => handleDiagnosticAnswer(diagAnswers[diagIndex])}
+className={`w-full py-3 rounded-xl font-semibold ${themeStyles.primary}`}
+>
+Submit Answer
+</button>
+</div>
+)}
+
+{currentQ.type === 'speech' && (
+<div className="space-y-4 text-center py-4">
+<button
+onClick={toggleRecording}
+className={`p-5 rounded-full transition-all ${isRecording ? 'bg-rose-500 text-white animate-pulse' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
+>
+<i data-lucide="mic" className="w-8 h-8"></i>
+</button>
+<p className="text-xs text-slate-500">{isRecording ? 'Listening...' : 'Tap microphone to speak or type response below'}</p>
+<input
+type="text"
+value={diagAnswers[diagIndex] || ''}
+onChange={(e) => setDiagAnswers({...diagAnswers, [diagIndex]: e.target.value})}
+placeholder="Transcribed voice output will appear here..."
+className="w-full p-3 border border-slate-300 rounded-xl text-sm"
+/>
+<button
+onClick={() => handleDiagnosticAnswer(diagAnswers[diagIndex])}
+className={`w-full py-3 rounded-xl font-semibold ${themeStyles.primary}`}
+>
+Submit Audio Answer
+</button>
+</div>
+)}
+</div>
+);
+})()}
+</div>
+)}
+
+{/* PLACEMENT */}
+{step === 'placement' && diagScores && (
+<div className="max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+<div className="text-center space-y-2">
+<div className="inline-flex p-3 bg-emerald-100 text-emerald-600 rounded-full mb-2">
+<i data-lucide="check-circle" className="w-8 h-8"></i>
+</div>
+<h2 className="text-2xl font-bold text-slate-900">Diagnostic Complete</h2>
+<p className="text-sm text-slate-500">Your initial placement in the Spiral Grammar Engine</p>
+</div>
+
+<div className="p-4 bg-pink-50 border border-pink-200 rounded-xl text-center">
+<span className="text-xs font-semibold text-pink-600 uppercase">Recommended Starting Level</span>
+<p className="text-2xl font-bold text-slate-900 mt-1">{diagScores.recommendedLevel} ({diagScores.recommendedBook})</p>
+</div>
+
+<div className="space-y-3">
+<h4 className="text-xs font-semibold text-slate-500 uppercase">Component Breakdown</h4>
+{[
+{ name: 'Reading', score: diagScores.reading },
+{ name: 'Writing', score: diagScores.writing },
+{ name: 'Use of English', score: diagScores.useOfEnglish },
+{ name: 'Listening', score: diagScores.listening },
+{ name: 'Speaking', score: diagScores.speaking }
+].map(item => (
+<div key={item.name} className="space-y-1">
+<div className="flex justify-between text-xs font-medium">
+<span className="text-slate-700">{item.name}</span>
+<span className="text-slate-500">{item.score}%</span>
+</div>
+<div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div className="bg-pink-500 h-full transition-all duration-500" style={{ width: `${item.score}%` }} />
+</div>
+</div>
+))}
+</div>
+
+<button
+onClick={() => setStep('dashboard')}
+className={`w-full py-3 font-semibold rounded-xl shadow-md ${themeStyles.primary}`}
+>
+Enter Learner Dashboard
+</button>
+</div>
+)}
+
+{/* DASHBOARD */}
+{step === 'dashboard' && (
+<div className="space-y-6">
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+<div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+<div className="p-3 bg-pink-100 text-pink-600 rounded-lg"><i data-lucide="book-open" className="w-5 h-5"></i></div>
+<div>
+<p className="text-xs text-slate-400 font-medium">Current Level</p>
+<p className="font-bold text-slate-800 text-sm">{currentLevel}</p>
+</div>
+</div>
+<div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+<div className="p-3 bg-amber-100 text-amber-600 rounded-lg"><i data-lucide="flame" className="w-5 h-5"></i></div>
+<div>
+<p className="text-xs text-slate-400 font-medium">Daily Streak</p>
+<p className="font-bold text-slate-800 text-sm">{streak} Days</p>
+</div>
+</div>
+<div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+<div className="p-3 bg-sky-100 text-sky-600 rounded-lg"><i data-lucide="award" className="w-5 h-5"></i></div>
+<div>
+<p className="text-xs text-slate-400 font-medium">Badges Unlocked</p>
+<p className="font-bold text-slate-800 text-sm">{achievements.length}</p>
+</div>
+</div>
+<div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+<div className="p-3 bg-emerald-100 text-emerald-600 rounded-lg"><i data-lucide="layers" className="w-5 h-5"></i></div>
+<div>
+<p className="text-xs text-slate-400 font-medium">Internal Book</p>
+<p className="font-bold text-slate-800 text-sm">{activeBook}</p>
+</div>
+</div>
+</div>
+
+<div className="grid md:grid-cols-3 gap-6">
+<div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
+<div className="space-y-2">
+<span className="text-xs font-semibold text-pink-600 uppercase">Core Curriculum</span>
+<h3 className="text-lg font-bold text-slate-900">Spiral Grammar Lesson</h3>
+<p className="text-xs text-slate-500">Explore rules returning at deeper levels. Current: {activeConcept.name}</p>
+</div>
+<button onClick={() => setStep('lesson')} className={`w-full py-2.5 font-semibold rounded-xl ${themeStyles.primary}`}>
+Start Lesson
+</button>
+</div>
+
+<div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
+<div className="space-y-2">
+<span className="text-xs font-semibold text-sky-600 uppercase">Interactive Practice</span>
+<h3 className="text-lg font-bold text-slate-900">A2I Conversation</h3>
+<p className="text-xs text-slate-500">Chat with {selectedPersona.name} with audio feedback and speech transcription.</p>
+</div>
+<button onClick={() => setStep('a2i')} className="w-full py-2.5 font-semibold rounded-xl bg-sky-500 hover:bg-sky-600 text-white shadow-md">
+Talk with A2I
+</button>
+</div>
+
+<div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
+<div className="space-y-2">
+<span className="text-xs font-semibold text-emerald-600 uppercase">Living Language</span>
+<h3 className="text-lg font-bold text-slate-900">UK / US / AU Variations</h3>
+<p className="text-xs text-slate-500">Explore real-world regional spelling, vocabulary, and pronunciation.</p>
+</div>
+<button onClick={() => setStep('living')} className="w-full py-2.5 font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-md">
+Explore Variations
+</button>
+</div>
+</div>
+
+<div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+<h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+<i data-lucide="layers" className="w-5 h-5 text-pink-500"></i> Spiral Curriculum Roadmap (Books A - G)
+</h3>
+<div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
+{Object.keys(CURRICULUM).map(bk => {
+const info = CURRICULUM[bk];
+const isActive = activeBook === bk;
+return (
+<div
+key={bk}
+onClick={() => { setActiveBook(bk); setActiveConcept(info.concepts[0]); }}
+className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${isActive ? 'bg-pink-50 border-pink-300 ring-2 ring-pink-400' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'}`}
+>
+<div className="flex justify-between items-center mb-1">
+<span className="text-xs font-bold text-slate-700">{bk}</span>
+<span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 font-semibold">{info.level}</span>
+</div>
+<p className="text-xs font-medium text-slate-800">{info.title}</p>
+</div>
+);
+})}
+</div>
+</div>
+</div>
+)}
+
+{/* LESSON */}
+{step === 'lesson' && (
+<div className="max-w-2xl mx-auto space-y-6">
+<button onClick={() => setStep('dashboard')} className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+← Back to Dashboard
+</button>
+
+<div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+<div className="border-b pb-4">
+<span className="text-xs font-semibold text-pink-600 uppercase">{activeBook} • {CURRICULUM[activeBook]?.level}</span>
+<h2 className="text-2xl font-bold text-slate-900 mt-1">{activeConcept.name}</h2>
+<p className="text-sm text-slate-500">{activeConcept.desc}</p>
+</div>
+
+<div className="space-y-4 bg-pink-50/50 p-5 rounded-xl border border-pink-100 text-sm text-slate-700">
+<h4 className="font-bold text-slate-900">Grammar Core System</h4>
+<p>In the Spiral Grammar Engine, concepts like <strong>Articles and Noun Structure</strong> recur with increasing depth. You don't just learn a rule once—you master how form connects to meaning and context.</p>
+<div className="bg-white p-3 rounded-lg border border-pink-200 text-xs space-y-1">
+<p className="font-semibold text-pink-700">Example Concept Focus:</p>
+<p>• "A book" = Non-specific, countable singular noun.</p>
+<p>• "The book" = Specific book known to both speaker and listener.</p>
+</div>
+</div>
+
+<div className="space-y-4 pt-2">
+<h3 className="font-semibold text-slate-800 text-sm">Practice Challenge</h3>
+<p className="text-sm text-slate-600">Complete the sentence using the correct form:</p>
+<div className="p-3 bg-slate-100 rounded-lg text-sm font-mono text-slate-800">
+"I saw ___ elephant at the zoo yesterday."
+</div>
+
+<div className="flex gap-2">
+<input
+type="text"
+value={practiceAnswer}
+onChange={e => setPracticeAnswer(e.target.value)}
+placeholder="Type missing word..."
+className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+/>
+<button
+onClick={() => {
+if (practiceAnswer.trim().toLowerCase() === 'an') {
+setPracticeFeedback({ success: true, text: 'Correct! "An" is used before vowel sounds.' });
+} else {
+setPracticeFeedback({ success: false, text: 'Not quite yet — let’s look at why: "Elephant" starts with a vowel sound (/ɛ/), so we use "an".' });
+}
+}}
+className={`px-5 py-2 font-semibold rounded-lg text-sm ${themeStyles.primary}`}
+>
+Check
+</button>
+</div>
+
+{practiceFeedback && (
+<div className={`p-4 rounded-xl text-sm border ${practiceFeedback.success ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-amber-50 text-amber-800 border-amber-200'}`}>
+{practiceFeedback.text}
+</div>
+)}
+</div>
+
+<div className="flex justify-between items-center pt-4 border-t">
+<button onClick={() => setStep('report')} className="text-xs font-semibold text-slate-500 hover:underline">
+Generate Assessment Report
+</button>
+<button onClick={() => setStep('a2i')} className={`px-5 py-2.5 font-semibold rounded-xl text-sm ${themeStyles.primary}`}>
+Practice in Conversation →
+</button>
+</div>
+</div>
+</div>
+)}
+
+{/* A2I CHAT */}
+{step === 'a2i' && (
+<div className="max-w-3xl mx-auto space-y-4">
+<div className="flex items-center justify-between">
+<button onClick={() => setStep('dashboard')} className="text-xs font-semibold text-slate-500 hover:text-slate-800">
+← Back to Dashboard
+</button>
+<span className="text-xs font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-full border border-sky-200">
+A2I Learning Companion
+</span>
+</div>
+
+<div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm grid md:grid-cols-2 gap-4">
+<div>
+<label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">A2I Companion Persona</label>
+<select
+value={selectedPersona.id}
+onChange={(e) => setSelectedPersona(PERSONAS.find(p => p.id === e.target.value))}
+className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none"
+>
+{PERSONAS.map(p => (
+<option key={p.id} value={p.id}>{p.name} ({p.ageTarget})</option>
+))}
+</select>
+</div>
+
+<div>
+<label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Correction Mode</label>
+<select
+value={correctionPref}
+onChange={(e) => setCorrectionPref(e.target.value)}
+className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none"
+>
+<option value="every">Correct me every time</option>
+<option value="important">Correct important mistakes only</option>
+<option value="natural">Let me speak naturally</option>
+</select>
+</div>
+</div>
+
+<div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-[420px] flex flex-col overflow-hidden">
+<div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+<div className="flex items-center gap-2">
+<div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center font-bold text-base">
+{selectedPersona.name.slice(-2)}
+</div>
+<div>
+<h4 className="text-xs font-bold text-slate-800">{selectedPersona.name}</h4>
+<p className="text-[10px] text-slate-500">{selectedPersona.style}</p>
+</div>
+</div>
+
+<div className="flex items-center gap-2 text-xs">
+<button
+onClick={() => setMemoryEnabled(!memoryEnabled)}
+className={`px-2 py-1 rounded border text-[10px] font-semibold ${memoryEnabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500'}`}
+>
+Memory: {memoryEnabled ? 'ON' : 'OFF'}
+</button>
+<button onClick={() => setA2iMemory([])} className="text-rose-500 hover:underline text-[10px]">
+Reset Memory
+</button>
+</div>
+</div>
+
+<div className="flex-1 p-4 overflow-y-auto space-y-3">
+{chatMessages.map((msg, idx) => (
+<div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+<div className={`max-w-[80%] p-3 rounded-2xl text-xs sm:text-sm leading-relaxed ${msg.sender === 'user' ? 'bg-sky-500 text-white rounded-br-none' : 'bg-slate-100 text-slate-800 rounded-bl-none border border-slate-200'}`}>
+{msg.text}
+</div>
+</div>
+))}
+</div>
+
+<div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center gap-2">
+<button
+onClick={toggleRecording}
+className={`p-2.5 rounded-xl border transition-all ${isRecording ? 'bg-rose-500 text-white animate-pulse' : 'bg-white text-slate-600 hover:bg-slate-100'}`}
+title="Speech Transcription input"
+>
+<i data-lucide="mic" className="w-4 h-4"></i>
+</button>
+<input
+type="text"
+value={chatInput}
+onChange={e => setChatInput(e.target.value)}
+onKeyDown={e => e.key === 'Enter' && handleSendA2i()}
+placeholder={`Message ${selectedPersona.name.split(' ')[0]}...`}
+className="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+/>
+<button onClick={handleSendA2i} className="p-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl shadow-sm">
+<i data-lucide="send" className="w-4 h-4"></i>
+</button>
+</div>
+</div>
+</div>
+)}
+
+{/* LIVING ENGLISH */}
+{step === 'living' && (
+<div className="max-w-3xl mx-auto space-y-6">
+<button onClick={() => setStep('dashboard')} className="text-xs font-semibold text-slate-500 hover:text-slate-800">
+← Back to Dashboard
+</button>
+
+<div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+<div className="border-b pb-4">
+<span className="text-xs font-semibold text-emerald-600 uppercase">Living Language Layer</span>
+<h2 className="text-2xl font-bold text-slate-900 mt-1">Regional Variation Engine</h2>
+<p className="text-sm text-slate-500">English isn't static. Explore authentic British, American, and Australian variations.</p>
+</div>
+
+<div className="grid md:grid-cols-3 gap-4">
+{Object.keys(LIVING_ENGLISH_DATA).map(region => {
+const data = LIVING_ENGLISH_DATA[region];
+return (
+<div key={region} className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+<div className="flex justify-between items-center">
+<h3 className="font-bold text-slate-800 text-base">{region}</h3>
+<span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">{data.tag}</span>
+</div>
+<div className="text-xs space-y-2 text-slate-600">
+<p><strong>Spelling:</strong> {data.spelling}</p>
+<p><strong>Key Terms:</strong> {data.terms}</p>
+<p><strong>Accent:</strong> {data.accent}</p>
+<div className="bg-white p-2.5 rounded border text-[11px] italic text-slate-700">
+"{data.sample}"
+</div>
+</div>
+</div>
+);
+})}
+</div>
+</div>
+</div>
+)}
+
+{/* REPORT */}
+{step === 'report' && (
+<div className="max-w-2xl mx-auto space-y-6">
+<button onClick={() => setStep('dashboard')} className="text-xs font-semibold text-slate-500 hover:text-slate-800">
+← Back to Dashboard
+</button>
+
+<div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6 print:shadow-none print:border-none">
+<div className="flex justify-between items-start border-b pb-4">
+<div>
+<h2 className="text-xl font-bold text-slate-900">English Made Sense</h2>
+<p className="text-xs text-slate-500">Spiral Grammar Engine by Savinethuni</p>
+</div>
+<div className="text-right">
+<span className="text-xs font-bold text-pink-600 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-200">Official Report</span>
+<p className="text-[10px] text-slate-400 mt-1">{new Date().toLocaleDateString()}</p>
+</div>
+</div>
+
+<div className="grid grid-cols-2 gap-4 text-xs">
+<div>
+<p className="text-slate-400 uppercase font-semibold">Learner Name</p>
+<p className="font-bold text-slate-800 text-sm">{user.username || 'Alex'}</p>
+</div>
+<div>
+<p className="text-slate-400 uppercase font-semibold">Assessed Level</p>
+<p className="font-bold text-slate-800 text-sm">{currentLevel}</p>
+</div>
+</div>
+
+<div className="space-y-3">
+<h4 className="text-xs font-bold text-slate-700 uppercase">Skill Breakdown</h4>
+{[
+{ name: 'Reading Comprehension', score: diagScores?.reading || 75 },
+{ name: 'Writing Production', score: diagScores?.writing || 65 },
+{ name: 'Use of English', score: diagScores?.useOfEnglish || 70 },
+{ name: 'Listening Skills', score: diagScores?.listening || 80 },
+{ name: 'Speaking & Phonology', score: diagScores?.speaking || 60 }
+].map(s => (
+<div key={s.name} className="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-lg">
+<span className="font-medium text-slate-700">{s.name}</span>
+<span className="font-bold text-slate-900">{s.score}%</span>
+</div>
+))}
+</div>
+
+<div className="bg-slate-50 p-4 rounded-xl border text-xs space-y-2">
+<p className="font-bold text-slate-800">Teacher & Parent Recommendations:</p>
+<p className="text-slate-600 leading-relaxed">• Focus on Book B/C article spiraling to solidify countability distinctions.</p>
+<p className="text-slate-600 leading-relaxed">• Continue daily A2I voice practice with Garbo or Elsie to boost spoken production fluency.</p>
+</div>
+
+<button
+onClick={() => window.print()}
+className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl text-sm shadow-md flex items-center justify-center gap-2"
+>
+<i data-lucide="printer" className="w-4 h-4"></i> Export / Print Report
+</button>
+</div>
+</div>
+)}
+
+{/* PARENT / TEACHER */}
+{step === 'parent' && (
+<div className="max-w-3xl mx-auto space-y-6">
+<button onClick={() => setStep('dashboard')} className="text-xs font-semibold text-slate-500 hover:text-slate-800">
+← Back to Dashboard
+</button>
+
+<div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+<div className="border-b pb-4">
+<span className="text-xs font-semibold text-purple-600 uppercase">Parent & Teacher Portal</span>
+<h2 className="text-2xl font-bold text-slate-900 mt-1">Learner Safeguards & Progress</h2>
+<p className="text-sm text-slate-500">Monitor high-level progress while respecting learner conversation privacy.</p>
+</div>
+
+<div className="grid sm:grid-cols-2 gap-4">
+<div className="p-4 bg-purple-50 rounded-xl border border-purple-100 space-y-2">
+<h4 className="font-bold text-purple-900 text-sm">Privacy Commitment</h4>
+<p className="text-xs text-purple-700/80 leading-relaxed">
+Private A2I learner conversations are <strong>never</strong> logged or shown to parents/teachers by default, keeping speech exploration safe and low-anxiety.
+</p>
+</div>
+<div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+<h4 className="font-bold text-slate-800 text-sm">Subscription Status</h4>
+<p className="text-xs text-slate-600">Hypothesis Plan: <strong>LKR 2,000 / month</strong></p>
+<p className="text-[11px] text-slate-400">Books A–C Free | Book D+ Unlockable</p>
+</div>
+</div>
+
+<button onClick={() => setStep('report')} className="w-full py-2.5 bg-purple-600 text-white font-semibold rounded-xl text-sm shadow-sm">
+View Detailed Assessment Report
+</button>
+</div>
+</div>
+)}
+
+</main>
+</div>
+);
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
 </body>
 </html>
